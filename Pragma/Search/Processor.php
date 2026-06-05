@@ -403,9 +403,15 @@ class Processor{
 
 	private static function clean_trailing_keywords(){
 		$db = DB::getDB();
-		$db->query('DELETE k FROM '.Keyword::getTableName().' k
-								LEFT JOIN '.Index::getTableName().' i ON k.id = i.keyword_id
-								WHERE i.id IS NULL');
+		if($db->getConnector() == DB::CONNECTOR_PGSQL){
+			$db->query('DELETE FROM '.Keyword::getTableName().' k
+				USING '.Index::getTableName().' AS i 
+				WHERE i.id IS NULL AND k.id = i.keyword_id');
+		} else {
+			$db->query('DELETE k FROM '.Keyword::getTableName().' k
+				LEFT JOIN '.Index::getTableName().' i ON k.id = i.keyword_id
+				WHERE i.id IS NULL');
+		}
 	}
 
 	private static function clean_accents($string) {
