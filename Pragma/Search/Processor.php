@@ -267,8 +267,14 @@ class Processor{
 				$parsing = static::get_context($text);
 			}
 			elseif( ! empty($text) ){//especially useful for the documents
-				if(file_exists($text)){
-					$parsing = static::get_context(file_get_contents($text));
+				if(class_exists('\Pragma\Docs\Helpers\S3') && \Pragma\Docs\Helpers\S3::isConfigured()) {
+					$storage = new \Pragma\Docs\Helpers\S3();
+					$url = $storage->getPresignedUrl($text);
+					$parsing = static::get_context(file_get_contents($url));
+				} else {
+					if(file_exists($text)){
+						$parsing = static::get_context(file_get_contents($text));
+					}
 				}
 			}
 
